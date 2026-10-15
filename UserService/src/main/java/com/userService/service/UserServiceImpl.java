@@ -65,19 +65,19 @@ private HotelServiceFeign hotelServicefeign;
 	
 	
 //	--------------------isme rating ->restTemplate and hotel-> Feignclient ke help se fetch kar rahe hai--------
-//	feignclient ko smjhne ke liye use kar rhe hai, alg alg client ko use kr rhe--------
+//	feignclient ko smjhne ke liye use kar rhe hai, FeignClient +RestTemplate  client ko use kr rhe--------
 	@Override
 	public User getUserById(Long id) {
 //		get user from db with the help of user repository
 		User user= userrepository.findById(id).orElseThrow( ()->new ResourceNotFound());
 		//fetch rating of the above user from rating service
 		//http://localhost:8083/ratings/user/{userid}
-		Rating[] ratinguser=restTemplate.getForObject("http://RatingService/ratings/user/"+user.getId(), Rating[].class);
+
+		Rating[] ratinguser=restTemplate.getForObject("http://RatingService/ratings/users/"+user.getId(), Rating[].class);
 		List<Rating> ratings=Arrays.stream(ratinguser).toList();
 		//each rating ka hotel fetch kr rhe 
 		List<Rating> ratinglist=ratings.stream().map(rating->{
-			//api call to hotel service to get hotel
-			//ResponseEntity<Hotel> forentity=restTemplate.getForEntity("http://HotelService/hotels/"+rating.getHotelId(), Hotel.class);
+			//api call to hotel service to get hotel through using feign client
 			Hotel hotel=hotelServicefeign.getHotel(rating.getHotelId());
 			//set the hotel to rating
 			rating.setHotel(hotel);
